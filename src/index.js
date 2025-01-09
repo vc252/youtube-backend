@@ -1,11 +1,21 @@
-import express from 'express';
+import app from './app.js';
 import 'dotenv/config'
 import connectDB from './db/index.js';
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8000;
 
-connectDB();
-const app = express();
+connectDB()
+.then(()=>{
+  app.on('error',(err)=>{
+    throw err;
+  })
+  app.listen(PORT,()=>{
+    console.log(`server started PORT:${PORT}`);
+  })
+})
+.catch((err)=>{
+  console.log('server failed to start',err);
+})
 
 app.get('/',(req,res,next)=>{
   res.status(200).json({
@@ -13,7 +23,4 @@ app.get('/',(req,res,next)=>{
   })
 })
 
-app.listen(PORT,()=>{
-  console.log(`server started PORT:${PORT}`);
-})
 
