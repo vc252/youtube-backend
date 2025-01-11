@@ -10,11 +10,15 @@ const userSchema = new mongoose.Schema({
     trim: true,
     index: true
   },
-  fullName: {
+  firstName: {
     type: string,
-    required: [true,'fullName is required'],
+    required: [true,'firstName is required'],
     trim: true,
-    index: true
+  },
+  lastName: {
+    type: string,
+    required: [true,'lastName is required'],
+    trim: true,
   },
   email: {
     type: string,
@@ -25,7 +29,8 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: string,
-    required: [true,'Password is required']
+    required: [true,'Password is required'],
+    trim: true
   },
   avatar: {
     type: string, //cloudinary url
@@ -47,6 +52,8 @@ const userSchema = new mongoose.Schema({
     type: String
   }
 },{timestamps: true});
+
+userSchema.index({firstName: 1,lastName: 1});
 
 userSchema.pre('save',async function(next) {
   try {
@@ -74,11 +81,12 @@ userSchema.methods.checkPassword = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
+  const fullName = this.firstName + ' ' + this.lastName;
   const token = jwt.sign({
     _id: this._id,
     username: this.username,
     email: this.email,
-    fullName: this.fullName,
+    fullName,
     avatar:this.avatar
   },
   process.env.ACCESS_TOKEN_SECRET,
