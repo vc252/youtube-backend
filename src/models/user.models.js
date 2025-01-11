@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema({
   username: {
-    type: string,
+    type: String,
     required: [true,'username is required'],
     unique: [true,'username should be unique'],
     lowercase: true,
@@ -11,33 +11,33 @@ const userSchema = new mongoose.Schema({
     index: true
   },
   firstName: {
-    type: string,
+    type: String,
     required: [true,'firstName is required'],
     trim: true,
   },
   lastName: {
-    type: string,
+    type: String,
     required: [true,'lastName is required'],
     trim: true,
   },
   email: {
-    type: string,
+    type: String,
     required: [true,'email is required'],
     unique: [true,'email should be unique'],
     lowercase: true,
     trim: true,
   },
   password: {
-    type: string,
+    type: String,
     required: [true,'Password is required'],
     trim: true
   },
   avatar: {
-    type: string, //cloudinary url
+    type: String, //cloudinary url
     required: [true,'avatar is required']
   },
   coverImage: {
-    type: string, //cloudinary url
+    type: String, //cloudinary url
   },
   watchHistory: {
     type: [
