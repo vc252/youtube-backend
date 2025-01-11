@@ -1,5 +1,7 @@
-import app from './app.js';
+//i was having problem in accessing .env file if i imported app before it
+//maybe bcz the controllers in routes attached to it need acccess which it was not getting
 import 'dotenv/config'
+import app from './app.js';
 import connectDB from './db/index.db.js';
 
 const PORT = process.env.PORT || 8000;
@@ -17,10 +19,5 @@ connectDB()
   console.log('server failed to start',err);
 })
 
-app.get('/',(req,res,next)=>{
-  res.status(200).json({
-    message: 'app started'
-  })
-})
 
 

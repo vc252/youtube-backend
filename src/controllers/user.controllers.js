@@ -5,7 +5,7 @@ import uploadOnCloudinary from "../utils/cloudinary.utils.js";
 import ApiResponse from "../utils/ApiResponse.utils.js";
 
 const registerUser = asyncHandler( async (req,res,next) => {
-  
+
   const {username, firstName, lastName, email, password} = req.body;
 
   const existingUser = await User.findOne({
@@ -15,17 +15,19 @@ const registerUser = asyncHandler( async (req,res,next) => {
     throw new ApiError(409,'email or username already exists');
   }
 
-  const avatarLocalPath = req.files?.avatar?.path;
-  const coverImageLocalPath = req.files?.coverImage?.path;
+  const avatarLocalPath = req.files?.avatar?.at(0).path;
+  const coverImageLocalPath = req.files?.coverImage?.at(0).path;
+
+  console.log(req.files);
 
   if (!avatarLocalPath) {
     throw new ApiError(400,'avatar image is required');
   }
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-
+  let coverImage;
   if (coverImageLocalPath) {
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    coverImage = await uploadOnCloudinary(coverImageLocalPath);
   }
 
   if (!avatar) {
@@ -42,7 +44,7 @@ const registerUser = asyncHandler( async (req,res,next) => {
     coverImage: coverImage || ""
   })
 
-  const userCreated = User.findById(user._id).select(
+  const userCreated = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 

@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import jwt from 'jsonwebtoken';
+import argon from 'argon2'
 
 const userSchema = new mongoose.Schema({
   username: {
