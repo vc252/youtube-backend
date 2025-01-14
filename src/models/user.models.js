@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import argon from 'argon2'
+import ApiError from '../utils/ApiError.utils.js';
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -14,11 +15,13 @@ const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: [true,'firstName is required'],
+    index: true,
     trim: true,
   },
   lastName: {
     type: String,
     required: [true,'lastName is required'],
+    index: true,
     trim: true,
   },
   email: {
@@ -54,7 +57,6 @@ const userSchema = new mongoose.Schema({
   }
 },{timestamps: true});
 
-userSchema.index({firstName: 1,lastName: 1});
 
 userSchema.pre('save',async function(next) {
   try {
@@ -73,44 +75,58 @@ userSchema.pre('save',async function(next) {
 //lets see which one to use
 //I think there could be one scenario where this might be better
 //if we don't what the user is using to login like username or email
-userSchema.methods.checkPassword = async function (password) {
-  const user = this;
-  if (!await argon.verify(user.password,password)) {
-    return false;
-  }
-  return true;
-}
+// userSchema.methods.checkPassword = async function (password) {
+//   const user = this;
+//   if (!await argon.verify(user.password,password)) {
+//     return false;
+//   }
+//   return true;
+// }
 
 userSchema.methods.generateAccessToken = function () {
-  const fullName = this.firstName + ' ' + this.lastName;
   const token = jwt.sign({
     _id: this._id,
     username: this.username,
     email: this.email,
-    fullName,
+    firstName: this.firstName,
+    lastName: this.lastName,
     avatar:this.avatar
   },
   process.env.ACCESS_TOKEN_SECRET,
   {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRY
   });
+
+  return token;
 }
+
 userSchema.methods.generateRefreshToken = function () {
   const token = jwt.sign({
     _id: this._id,
   },
   process.env.REFRESH_TOKEN_SECRET,
   {
-    expiresIn: process.env.REFRESJ_TOKEN_EXPIRY
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY
   });
+
+  return token;
 }
 
-userSchema.static('verifyUser',async function (username,password) {
-  const user = await this.findOne({username});
-  if (!user || !await argon.verify(user.password,password)) {
-    return false;
+userSchema.static('verifyUser',async function (username, email, password) {
+
+  const user = await this.findOne({
+    $or: [{username},{email}]
+  })
+  console.log(email)
+  if (!user) {
+    throw new ApiError(404,'user not found');
   }
-  return true;
+
+  if (!await argon.verify(user.password,password)) {
+    throw new ApiError(401,'Invalid password');
+  }
+
+  return user._id;
 })
 
 const User = mongoose.model('User',userSchema);
