@@ -5,15 +5,15 @@ import User from "../models/user.models.js";
 
 const verifyJWT = asyncHandler( async (req,_,next) => {
   //we need to get the accessToken from cookies
-  const accessToken = req.cookies?.accessToken || req.headers.authorization.replace("Bearer ","");
+  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ","");
 
   if (!accessToken) {
     throw new ApiError(401,'Unauthrized request');
   }
 
-  const payload = jwt.verify(accessToken,process.env.ACCESS_TOKEN_SECRET);
+  const decodedToken = jwt.verify(accessToken,process.env.ACCESS_TOKEN_SECRET);
 
-  const user = await User.findById(payload._id).select(
+  const user = await User.findById(decodedToken?._id).select(
     "-password -refreshToken"
   )
 
