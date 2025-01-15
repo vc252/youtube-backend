@@ -1,4 +1,5 @@
 import {v2 as cloudinary} from 'cloudinary'
+import { extractPublicId } from 'cloudinary-build-url'
 import fs from 'node:fs'
 import ApiError from './ApiError.utils.js';
 
@@ -38,4 +39,21 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 }
 
-export default uploadOnCloudinary;
+const deleteFromCloudinary = async (url) => {
+  try {
+    if (!url) return null;
+    const publicId = extractPublicId(url);
+    const destroyResult = await cloudinary.uploader
+      .destroy(publicId)
+    console.log('file deleted successfully from cloudinary');
+    // console.log(destroyResult);
+    return destroyResult;
+  } catch (error) {
+    throw new ApiError(500,'error in deleting file from cloudinary',[error.message],error.stack);
+  }
+}
+
+export {
+  uploadOnCloudinary,
+  deleteFromCloudinary
+}

@@ -75,13 +75,10 @@ userSchema.pre('save',async function(next) {
 //lets see which one to use
 //I think there could be one scenario where this might be better
 //if we don't what the user is using to login like username or email
-// userSchema.methods.checkPassword = async function (password) {
-//   const user = this;
-//   if (!await argon.verify(user.password,password)) {
-//     return false;
-//   }
-//   return true;
-// }
+//we are using this to check the old password
+userSchema.methods.checkPassword = async function (password) {
+  return await argon.verify(this.password,password);
+}
 
 userSchema.methods.generateAccessToken = function () {
   const token = jwt.sign({
@@ -117,7 +114,7 @@ userSchema.static('verifyUser',async function (username, email, password) {
   const user = await this.findOne({
     $or: [{username},{email}]
   })
-  console.log(email)
+  
   if (!user) {
     throw new ApiError(404,'user not found');
   }
