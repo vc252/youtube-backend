@@ -4,6 +4,7 @@ import ApiError from "../utils/ApiError.utils.js";
 import {uploadOnCloudinary,deleteFromCloudinary} from "../utils/cloudinary.utils.js";
 import ApiResponse from "../utils/ApiResponse.utils.js";
 import jwt from 'jsonwebtoken'
+import mongoose from "mongoose";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
@@ -193,6 +194,7 @@ const getCurrentUser = asyncHandler( async (req, res, next) => {
   if (!req.user) {
     throw new ApiError(400,'user does not exists');
   }
+  // if (req.user._id instanceof mongoose.Types.ObjectId) console.log(true);
   res.status(200).json(
     new ApiResponse(200,req.user,'current user fetched successfully')
   )
@@ -376,6 +378,63 @@ const getUserChannelProfile = asyncHandler( async (req, res, next) => {
   )
 })
 
+const getWatchHistory = asyncHandler( async (req, res, next) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: req.user._id
+      }
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        //this will work on the objects in watch history
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              //this will work on the objects in owner
+              pipeline: [
+                {
+                  $project:{
+                    firstName: 1,
+                    lastName: 1,
+                    username: 1,
+                    avatar: 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ])
+
+  if (!user?.length) {
+    throw new ApiError(404,"user does not exists");
+  }
+
+  return res
+  .satus(200)
+  .json(
+    new ApiResponse(200,user[0],"watch history fetched successfully")
+  )
+})
+
 export {
   registerUser,
   loginUser,
@@ -385,5 +444,7 @@ export {
   updateAccountDetails,
   updateAvatar,
   updateCoverImage,
-  getUserChannelProfile
+  getCurrentUser,
+  getUserChannelProfile,
+  getWatchHistory
 };
