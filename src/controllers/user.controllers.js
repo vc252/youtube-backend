@@ -119,8 +119,8 @@ const logoutUser = asyncHandler( async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined
+      $unset: {
+        refreshToken: ""
       }
     },
     {
@@ -135,8 +135,8 @@ const logoutUser = asyncHandler( async (req, res, next) => {
 
   return res
   .status(200)
-  .cookie("accessToken",options)
-  .cookie("refreshToken",options)
+  .cookie("accessToken","",options)
+  .cookie("refreshToken","",options)
   .json(
     new ApiResponse(200,{},'User logged Out')
   )
@@ -309,12 +309,10 @@ const getUserChannelProfile = asyncHandler( async (req, res, next) => {
     throw new ApiError(400,'Username not provided');
   }
 
-  username = username?.trim();
-
   const channel = await User.aggregate([
     {
       $match: {
-        username: username?.toLowerCase()
+        username: username.trim()?.toLowerCase()
       }
     },
     {
@@ -421,6 +419,11 @@ const getWatchHistory = asyncHandler( async (req, res, next) => {
           }
         ]
       }
+    },
+    {
+      $project: {
+        watchHistory: 1
+      }
     }
   ])
 
@@ -429,7 +432,7 @@ const getWatchHistory = asyncHandler( async (req, res, next) => {
   }
 
   return res
-  .satus(200)
+  .status(200)
   .json(
     new ApiResponse(200,user[0],"watch history fetched successfully")
   )

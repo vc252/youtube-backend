@@ -71,7 +71,36 @@ function validatePasswordChange(req,_,next) {
   }
 }
 
+function validateAccountUpdate(req,_,next) {
+  try {
+    const requiredBody = z.object({
+      firstName: z
+        .string('firstName should be a string')
+        .min(1,'minimum 1 character in first name')
+        .max(100,'maximum 100 characters in first name'),
+      lastName: z
+        .string('lastName should be a string')
+        .min(1,'minimum 1 character in last name')
+        .max(100,'maximum 100 characters in last name'),
+      email: z
+        .string('email should be a string')
+        .email('email not of valid format')
+    })
+  
+    const parsedWithSuccess = requiredBody.safeParse(req.body);
+  
+    if (!parsedWithSuccess.success) {
+      throw new ApiError(401,'update format not valid',[parsedWithSuccess.error])
+    }
+  
+    return next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 export {
   validateRegistration,
-  validatePasswordChange
+  validatePasswordChange,
+  validateAccountUpdate
 };
