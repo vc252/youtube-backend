@@ -11,33 +11,33 @@ cloudinary.config({
 
 const uploadOnCloudinary = async (localFilePath) => {
   try {
-    
     if (!localFilePath) return null;
 
-    const uploadResult = await cloudinary.uploader
-      .upload(localFilePath,{
-        resource_type: 'auto'
-      })
+    const uploadResult = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: 'auto',
+    });
 
-    console.log('file has been uploaded');
+    console.log('File has been uploaded to Cloudinary');
     return uploadResult.url;
 
-  } catch(err) {
-
-    console.log('error uploading file to cloudinary ',err.message);
-    throw new ApiError(500,'Not able to upload file',[err.message],err.stack);
+  } catch (err) {
+    console.error('Error uploading file to Cloudinary:', err.message);
+    throw new ApiError(500, 'Not able to upload file', err.message, err.stack);
 
   } finally {
-
-    try {
-      fs.unlinkSync(localFilePath);
-      console.log('temp File deleted successfully');
-    } catch (err) {
-      console.log('Error deleting temp File', err.message)
+    if (localFilePath) {
+      try {
+        console.log('Attempting to delete temp file:', localFilePath);
+        await fs.promises.unlink(localFilePath);
+        console.log('Temp file deleted successfully');
+        console.log('Checking if file exists before deletion:', fs.existsSync(localFilePath));
+      } catch (err) {
+        console.error('Error deleting temp file:', err.message);
+      }
     }
-
   }
-}
+};
+
 
 const deleteFromCloudinary = async (url) => {
   try {
