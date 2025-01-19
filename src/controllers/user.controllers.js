@@ -44,11 +44,9 @@ const registerUser = asyncHandler( async (req, res, next) => {
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-  if (coverImageLocalPath) {
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    if (!coverImage) {
-      throw new ApiError(500,'not able to upload cover image');
-    }
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  if (coverImageLocalPath && !coverImage) {
+    throw new ApiError(500,'not able to upload cover image');
   }
 
   if (!avatar) {
@@ -62,7 +60,7 @@ const registerUser = asyncHandler( async (req, res, next) => {
     password,
     email,
     avatar,
-    coverImage: coverImage || ""
+    coverImage: coverImage ?? ""
   })
 
   const userCreated = await User.findById(user._id).select(
@@ -389,7 +387,7 @@ const getWatchHistory = asyncHandler( async (req, res, next) => {
         localField: "watchHistory",
         foreignField: "_id",
         as: "watchHistory",
-        //this will work on the objects in watch history
+        //this will work on the objects in watch history or watch History itself
         pipeline: [
           {
             $lookup: {

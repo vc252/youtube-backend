@@ -40,7 +40,7 @@ function validateRegistration(req,_,next) {
     const parsedDataWithSuccess = requiredBody.safeParse(req.body);
   
     if (!parsedDataWithSuccess.success) {
-      throw new ApiError(401,'registration format not valid',[parsedDataWithSuccess.error])
+      throw new ApiError(401,'registration format not valid',parsedDataWithSuccess.error)
     }
   
     next();
@@ -62,7 +62,7 @@ function validatePasswordChange(req,_,next) {
     const parsedWithSuccess = requiredBody.safeParse(req.body);
   
     if (!parsedWithSuccess.success) {
-      throw new ApiError(401,'new password format not valid',[parsedWithSuccess.error])
+      throw new ApiError(401,'new password format not valid',parsedWithSuccess.error)
     }
   
     next();
@@ -90,7 +90,7 @@ function validateAccountUpdate(req,_,next) {
     const parsedWithSuccess = requiredBody.safeParse(req.body);
   
     if (!parsedWithSuccess.success) {
-      throw new ApiError(401,'update format not valid',[parsedWithSuccess.error])
+      throw new ApiError(401,'update format not valid',parsedWithSuccess.error)
     }
   
     return next();
