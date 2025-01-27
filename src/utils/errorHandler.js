@@ -1,6 +1,6 @@
 import ApiError from "./ApiError.utils.js";
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, _, res, next) => {
   const isApiError = err instanceof ApiError;
   const statusCode = isApiError ? err.statusCode : 500;
   //basic response

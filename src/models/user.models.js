@@ -131,6 +131,8 @@ userSchema.static("verifyUser", async function (username, email, password) {
   return user._id;
 });
 
+userSchema.plugin(mongooseAggregatePaginate);
+
 const User = mongoose.model("User", userSchema);
 
 export default User;
